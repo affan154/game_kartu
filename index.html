@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Game Kartu Multi-Level</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #121212;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h2 {
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .level-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .level-buttons button {
+      background: #03dac6;
+      color: black;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .level-buttons button:hover {
+      background: #00c4b4;
+    }
+    #gameBoard {
+      display: grid;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .card {
+      width: 60px;
+      height: 60px;
+      background: #03dac6;
+      color: black;
+      font-size: 1.5rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s, background 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card.flipped {
+      background: #2a2a2a;
+      color: white;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <h2>🃏 Game Kartu: Pilih Level</h2>
+  <div class="level-buttons" id="levelButtons"></div>
+  <div id="gameBoard"></div>
+
+  <script>
+    const allSymbols = ['🍎','🍌','🍇','🍉','🍒','🥝','🍍','🥥','🍋','🍊','🍈','🍓','🥭','🫐','🍅','🌽','🥕','🥬','🥦','🧄','🧅','🍄','🌶','🥔','🍠','🥜','🌰','🍞','🥐','🥖','🥯','🧀','🥚','🍗','🍖','🌭','🍔','🍟','🍕','🥪','🥙','🧆','🌮','🌯','🥗','🍛','🍜','🍝','🍣','🍤','🍱','🥮','🍙','🍚','🍘','🍥','🥠','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🧃','🥤','🧋','🍩','🍪'];
+
+    let flippedCards = [];
+    let matchedCards = [];
+    let currentLevel = 1;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function createLevelButtons() {
+      const container = document.getElementById('levelButtons');
+      for (let i = 1; i <= 10; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = `Level ${i}`;
+        btn.onclick = () => startLevel(i);
+        container.appendChild(btn);
+      }
+    }
+
+    function startLevel(level) {
+      currentLevel = level;
+      const pairCount = level * 5;
+      const symbols = allSymbols.slice(0, pairCount);
+      const cards = [...symbols, ...symbols];
+      shuffle(cards);
+      flippedCards = [];
+      matchedCards = [];
+
+      const board = document.getElementById('gameBoard');
+      board.innerHTML = '';
+      const columns = Math.ceil(Math.sqrt(cards.length));
+      board.style.gridTemplateColumns = `repeat(${columns}, 60px)`;
+
+      cards.forEach((symbol, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.index = index;
+        card.dataset.symbol = symbol;
+        card.textContent = '';
+        card.onclick = () => flipCard(card);
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (flippedCards.length === 2 || card.classList.contains('flipped')) return;
+
+      card.textContent = card.dataset.symbol;
+      card.classList.add('flipped');
+      flippedCards.push(card);
+
+      if (flippedCards.length === 2) {
+        const [card1, card2] = flippedCards;
+        if (card1.dataset.symbol === card2.dataset.symbol) {
+          matchedCards.push(card1.dataset.symbol);
+          flippedCards = [];
+          if (matchedCards.length === currentLevel * 5) {
+            setTimeout(() => alert(`🎉 Level ${currentLevel} selesai!`), 300);
+          }
+        } else {
+          setTimeout(() => {
+            card1.textContent = '';
+            card2.textContent = '';
+            card1.classList.remove('flipped');
+            card2.classList.remove('flipped');
+            flippedCards = [];
+          }, 1000);
+        }
+      }
+    }
+
+    createLevelButtons();
+    startLevel(1);
+  </script>
+</body>
+</html>
